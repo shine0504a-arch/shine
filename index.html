@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shine欣 好物牆</title>
+<meta name="description" content="Shine欣 近一個月的直播商品，錯過直播也能慢慢挑">
+<meta property="og:title" content="Shine欣 好物牆">
+<meta property="og:description" content="陪你一起把日常過成喜歡的樣子｜近一個月直播商品一次看">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5efe7;--paper:#fffaf3;--ink:#3a2d26;--sub:#8a776a;--line:#e6dacb;
+  --acc:#b98a4e;--acc2:#7d8f72;--chip:#efe5d8;--chipOn:#3a2d26;--chipOnT:#fffaf3;
+  --old:#a8693b;--shadow:0 6px 18px rgba(80,55,35,.10);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#1c1814;--paper:#26201b;--ink:#f1e7dc;--sub:#b3a291;--line:#3a3129;
+  --acc:#d4a86a;--acc2:#a3b897;--chip:#2f2822;--chipOn:#f1e7dc;--chipOnT:#1c1814;
+  --old:#e0a073;--shadow:0 6px 18px rgba(0,0,0,.35)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;font-size:16px;line-height:1.6}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 120px}
+header{text-align:center;padding:26px 0 8px}
+header h1{font-family:"Noto Serif TC",serif;font-size:32px;letter-spacing:4px;margin:0;font-weight:700}
+header h1 small{display:block;font-size:13px;letter-spacing:6px;color:var(--acc);font-family:"Noto Sans TC",sans-serif;font-weight:500;margin-bottom:4px}
+.slogan{width:min(220px,58vw);border-radius:14px;margin:12px auto 0;display:block;box-shadow:var(--shadow)}
+.notice{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:18px 0 6px;font-size:15px;color:var(--ink);box-shadow:var(--shadow)}
+.notice b{color:var(--old)}
+.bar{background:var(--bg);padding:10px 0 8px;border-bottom:1px solid var(--line)}
+.row{display:flex;gap:8px;overflow-x:auto;padding:4px 0;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.lbl{font-size:13px;color:var(--sub);margin:6px 0 0;letter-spacing:1px}
+.chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:15px;cursor:pointer;white-space:nowrap;user-select:none}
+.chip.on{background:var(--chipOn);color:var(--chipOnT);border-color:var(--chipOn)}
+.chip .n{font-size:12px;opacity:.65;margin-left:4px}
+.tools{display:flex;gap:8px;align-items:center;margin-top:8px}
+.search{flex:1;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:9px 16px;font-size:16px;font-family:inherit;outline:none}
+.clear{border:none;background:none;color:var(--acc);font-size:14px;cursor:pointer;padding:6px;white-space:nowrap}
+.count{font-size:14px;color:var(--sub);margin:12px 2px 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+@media(min-width:700px){.grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}}
+.card{background:var(--paper);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.ph{position:relative;aspect-ratio:800/1415;background:var(--chip);cursor:zoom-in;overflow:hidden}
+.ph img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s}
+.ph img.ok{opacity:1}
+.old{position:absolute;left:0;right:0;bottom:0;background:rgba(58,40,28,.82);color:#ffe9d2;font-size:12px;line-height:1.45;padding:6px 8px}
+.info{padding:9px 11px 11px;display:flex;flex-direction:column;gap:6px;flex:1}
+.t{font-weight:700;font-size:15px;line-height:1.35}
+.t .code{color:var(--acc)}
+.m{font-size:12.5px;color:var(--sub)}
+.buy{margin-top:auto;display:block;text-align:center;background:#06c755;color:#fff;text-decoration:none;border-radius:12px;padding:8px 6px;font-size:14.5px;font-weight:700}
+.empty{text-align:center;color:var(--sub);padding:50px 0}
+.more{height:40px}
+/* lightbox */
+.lb{position:fixed;inset:0;background:rgba(20,14,10,.92);z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;padding:14px}
+.lb.on{display:flex}
+.lb img{max-width:100%;max-height:72vh;border-radius:12px}
+.lb .cap{color:#fff;text-align:center;margin:10px 0 6px;font-size:16px;max-width:520px}
+.lb .cap .oldt{display:block;color:#ffcf9e;font-size:14px;margin-top:6px}
+.lb .act{display:flex;gap:10px;align-items:center}
+.lb .buy{padding:10px 20px;font-size:16px}
+.lb button{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:22px;cursor:pointer}
+.lb .x{position:absolute;top:12px;right:14px}
+/* music */
+.music{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:15;background:var(--chipOn);color:var(--chipOnT);border:none;border-radius:999px;padding:11px 16px;font-size:15px;box-shadow:var(--shadow);cursor:pointer;font-family:inherit}
+.top{position:fixed;left:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:15;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:50%;width:44px;height:44px;font-size:18px;box-shadow:var(--shadow);cursor:pointer;display:none}
+footer{text-align:center;color:var(--sub);font-size:13px;margin-top:40px}
+footer a{color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><small>SHINE · KOREA</small>Shine欣 好物牆</h1>
+    <img class="slogan" src="slogan.jpg" alt="Shine欣 陪你一起把日常過成喜歡的樣子">
+  </header>
+
+  <div class="notice">
+    這裡收錄近 1 個月的直播商品🛍️ 錯過直播也能慢慢挑～<br>
+    看到喜歡的，點「💬 我想加購」就會開啟官方 LINE，小編幫你處理💛<br>
+    <b>⏳ 標示的商品：直播已超過 2 週，部分顏色、尺寸可能已售完，加購前歡迎先私訊小編確認唷💛</b>
+  </div>
+
+  <div class="bar">
+    <div class="lbl">📅 直播日期</div>
+    <div class="row" id="dates"></div>
+    <div class="lbl">🏷️ 店家</div>
+    <div class="row" id="stores"></div>
+    <div class="tools">
+      <input class="search" id="q" type="search" inputmode="search" placeholder="🔍 輸入標號或品名，例如 2665、外套">
+      <button class="clear" id="clr">清除篩選</button>
+    </div>
+  </div>
+
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+  <div class="more" id="more"></div>
+  <div class="empty" id="empty" hidden>找不到符合的商品，換個條件試試看🥺</div>
+
+  <footer>
+    有任何問題歡迎私訊 <a href="https://line.me/R/ti/p/@shine168" target="_blank" rel="noopener">官方 LINE @shine168</a><br>
+    <span id="upd"></span>
+  </footer>
+</div>
+
+<div class="lb" id="lb">
+  <button class="x" id="lbx" aria-label="關閉">✕</button>
+  <img id="lbi" alt="">
+  <div class="cap" id="lbc"></div>
+  <div class="act">
+    <button id="lbp" aria-label="上一個">‹</button>
+    <a class="buy" id="lbb" target="_blank" rel="noopener">💬 我想加購</a>
+    <button id="lbn" aria-label="下一個">›</button>
+  </div>
+</div>
+
+<button class="top" id="top" aria-label="回到頂端">↑</button>
+<button class="music" id="mus">🎵 播放音樂</button>
+<audio id="aud" src="music.mp3" loop preload="none"></audio>
+
+<script>
+const IMG=id=>"https://my-img-cdn.hotsnet.com/upload2/screenshot/716564225/openBid_"+id+".jpg";
+const LINE_ID="@shine168";
+const OLD_DAYS=14, SHOW_DAYS=31, PAGE=40;
+const WD="日一二三四五六";
+const $=id=>document.getElementById(id);
+let ALL=[],VIEW=[],shown=0,selDates=new Set(),selStores=new Set(),q="",lbIdx=-1;
+
+function parseSession(s){ // "1116 晚場 金髮" -> date, slot, store
+  const m=s.match(/^(\d{2})(\d{2})\s+(\S+)\s+(.+)$/); if(!m) return null;
+  const now=new Date(); let y=now.getFullYear(); const mo=+m[1], d=+m[2];
+  if(mo>now.getMonth()+2) y--; // 12 月的資料在 1 月看
+  return {date:new Date(y,mo-1,d), slot:m[3], store:m[4].trim()};
+}
+const storeKey=s=>s.replace(/家$/,"");
+const storeLabel=s=>/家$|棚播|\d$/.test(s)?s:s+"家";
+const ds=d=>(d.getMonth()+1)+"/"+d.getDate();
+const dk=d=>d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+
+async function load(){
+  let j;
+  try{ j=await (await fetch("data.json?v="+Date.now())).json(); }catch(e){ $("count").textContent="資料讀取失敗，請稍後再試"; return; }
+  const today=new Date(); today.setHours(0,0,0,0);
+  ALL=[];
+  for(const r of j.rows){
+    const p=parseSession(r[0]); if(!p) continue;
+    const age=Math.round((today-p.date)/864e5);
+    if(age>SHOW_DAYS) continue;
+    ALL.push({code:r[1],name:r[2],img:r[3],date:p.date,slot:p.slot,store:p.store,sk:storeKey(p.store),age,old:age>OLD_DAYS});
+  }
+  ALL.sort((a,b)=>b.date-a.date||(a.slot===b.slot?0:a.slot==="宵夜"?-1:1)||(+b.code||0)-(+a.code||0));
+  if(j.made&&j.made!=="sample"){const t=new Date(j.made);$("upd").textContent="資料更新：" + (t.getMonth()+1)+"/"+t.getDate();}
+  buildChips(); apply();
+}
+
+function buildChips(){
+  // 日期
+  const dm=new Map(); ALL.forEach(x=>{const k=dk(x.date); if(!dm.has(k)) dm.set(k,{d:x.date,n:0}); dm.get(k).n++;});
+  const D=$("dates"); D.innerHTML="";
+  D.appendChild(chip("全部",null,selDates.size===0,()=>{selDates.clear();refresh();}));
+  for(const [k,v] of dm) D.appendChild(chip(ds(v.d)+"（"+WD[v.d.getDay()]+"）",v.n,selDates.has(k),()=>{toggle(selDates,k);refresh();}));
+  // 店家（只列出目前日期範圍內有的）
+  const sm=new Map(); ALL.filter(x=>!selDates.size||selDates.has(dk(x.date))).forEach(x=>{if(!sm.has(x.sk)) sm.set(x.sk,{l:storeLabel(x.store),n:0}); sm.get(x.sk).n++;});
+  for(const k of [...selStores]) if(!sm.has(k)) selStores.delete(k);
+  const S=$("stores"); S.innerHTML="";
+  S.appendChild(chip("全部",null,selStores.size===0,()=>{selStores.clear();refresh();}));
+  [...sm.entries()].sort((a,b)=>b[1].n-a[1].n).forEach(([k,v])=>S.appendChild(chip(v.l,v.n,selStores.has(k),()=>{toggle(selStores,k);refresh();})));
+}
+function chip(t,n,on,fn){const c=document.createElement("div");c.className="chip"+(on?" on":"");c.innerHTML=t+(n!=null?'<span class="n">'+n+'</span>':"");c.onclick=fn;return c;}
+function toggle(set,k){set.has(k)?set.delete(k):set.add(k);}
+function refresh(){buildChips();apply();}
+
+function apply(){
+  const qq=q.trim().toLowerCase();
+  VIEW=ALL.filter(x=>(!selDates.size||selDates.has(dk(x.date)))&&(!selStores.size||selStores.has(x.sk))&&(!qq||(x.code+"標 "+x.code+" "+x.name+" "+x.store).toLowerCase().includes(qq)));
+  $("grid").innerHTML=""; shown=0; more();
+  $("count").textContent="共 "+VIEW.length+" 件商品"+(selDates.size||selStores.size||qq?"（已篩選）":"");
+  $("empty").hidden=VIEW.length>0;
+}
+function title(x){return x.code+"標［"+storeLabel(x.store)+"］"+x.name;}
+function lineUrl(x){return "https://line.me/R/oaMessage/"+encodeURIComponent(LINE_ID)+"/?"+encodeURIComponent("你好～我想加購 "+title(x)+"（"+ds(x.date)+" 直播）💛");}
+function more(){
+  const G=$("grid"); const end=Math.min(shown+PAGE,VIEW.length);
+  for(let i=shown;i<end;i++){
+    const x=VIEW[i]; const c=document.createElement("div"); c.className="card";
+    c.innerHTML='<div class="ph"><img loading="lazy" alt="'+title(x)+'" src="'+IMG(x.img)+'" onload="this.classList.add(\'ok\')">'+(x.old?'<div class="old">⏳ 直播已超過 2 週・可能缺貨，請先私訊確認</div>':'')+'</div>'+
+      '<div class="info"><div class="t"><span class="code">'+x.code+'標</span> '+x.name+'</div><div class="m">'+storeLabel(x.store)+'｜'+ds(x.date)+'（'+WD[x.date.getDay()]+'）'+x.slot+'</div>'+
+      '<a class="buy" target="_blank" rel="noopener" href="'+lineUrl(x)+'">💬 我想加購</a></div>';
+    c.querySelector(".ph").onclick=()=>openLB(i);
+    G.appendChild(c);
+  }
+  shown=end;
+}
+new IntersectionObserver(e=>{if(e[0].isIntersecting&&shown<VIEW.length) more();},{rootMargin:"800px"}).observe($("more"));
+
+function openLB(i){lbIdx=i;const x=VIEW[i];$("lbi").src=IMG(x.img);$("lbi").alt=title(x);
+  $("lbc").innerHTML=title(x)+"<br><small>"+ds(x.date)+"（"+WD[x.date.getDay()]+"）"+x.slot+"直播</small>"+(x.old?'<span class="oldt">⏳ 直播已超過 2 週，部分顏色、尺寸可能已售完，加購前歡迎先私訊小編確認唷💛</span>':"");
+  $("lbb").href=lineUrl(x);$("lb").classList.add("on");document.body.style.overflow="hidden";}
+function closeLB(){$("lb").classList.remove("on");document.body.style.overflow="";}
+$("lbx").onclick=closeLB;$("lb").onclick=e=>{if(e.target.id==="lb")closeLB();};
+$("lbp").onclick=()=>openLB((lbIdx-1+VIEW.length)%VIEW.length);
+$("lbn").onclick=()=>{if(lbIdx+1>=shown&&shown<VIEW.length)more();openLB((lbIdx+1)%VIEW.length);};
+let sx=0;$("lb").addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});
+$("lb").addEventListener("touchend",e=>{const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>60)(d<0?$("lbn"):$("lbp")).click();},{passive:true});
+document.addEventListener("keydown",e=>{if(!$("lb").classList.contains("on"))return;if(e.key==="Escape")closeLB();if(e.key==="ArrowRight")$("lbn").click();if(e.key==="ArrowLeft")$("lbp").click();});
+
+let tmr;$("q").oninput=e=>{clearTimeout(tmr);tmr=setTimeout(()=>{q=e.target.value;apply();},250);};
+$("clr").onclick=()=>{selDates.clear();selStores.clear();q="";$("q").value="";refresh();};
+window.addEventListener("scroll",()=>{$("top").style.display=scrollY>900?"block":"none";},{passive:true});
+$("top").onclick=()=>scrollTo({top:0,behavior:"smooth"});
+
+const A=$("aud");A.volume=.45;
+$("mus").onclick=()=>{if(A.paused){A.play().then(()=>{$("mus").textContent="⏸ 暫停音樂";}).catch(()=>{});}else{A.pause();$("mus").textContent="🎵 播放音樂";}};
+
+load();
+</script>
+</body>
+</html>
