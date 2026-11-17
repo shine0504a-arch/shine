@@ -119,6 +119,7 @@ footer a{color:var(--acc)}
 <button class="top" id="top" aria-label="回到頂端">↑</button>
 <button class="music" id="mus">🎵 播放音樂</button>
 <audio id="aud" src="music.mp3" loop preload="none"></audio>
+<script data-goatcounter="https://shinevup.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 
 <script>
 const IMG=id=>"https://my-img-cdn.hotsnet.com/upload2/screenshot/716564225/openBid_"+id+".jpg";
@@ -126,6 +127,7 @@ const LINE_ID="@shine168";
 const OLD_DAYS=14, SHOW_DAYS=31, PAGE=40;
 const WD="日一二三四五六";
 const $=id=>document.getElementById(id);
+function track(kind,x){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path:kind+"/"+x.code+"標-"+storeLabel(x.store),title:(kind==="buy"?"按我想加購：":"點開看：")+title(x),event:true});}catch(e){}}
 let ALL=[],VIEW=[],shown=0,selDates=new Set(),selStores=new Set(),q="",lbIdx=-1;
 
 function parseSession(s){ // "1116 晚場 金髮" -> date, slot, store
@@ -189,6 +191,7 @@ function more(){
       '<div class="info"><div class="t"><span class="code">'+x.code+'標</span> '+x.name+'</div><div class="m">'+storeLabel(x.store)+'｜'+ds(x.date)+'（'+WD[x.date.getDay()]+'）'+x.slot+'</div>'+
       '<a class="buy" target="_blank" rel="noopener" href="'+lineUrl(x)+'">💬 我想加購</a></div>';
     c.querySelector(".ph").onclick=()=>openLB(i);
+    c.querySelector(".buy").onclick=()=>track("buy",x);
     G.appendChild(c);
   }
   shown=end;
@@ -197,7 +200,7 @@ new IntersectionObserver(e=>{if(e[0].isIntersecting&&shown<VIEW.length) more();}
 
 function openLB(i){lbIdx=i;const x=VIEW[i];$("lbi").src=IMG(x.img);$("lbi").alt=title(x);
   $("lbc").innerHTML=title(x)+"<br><small>"+ds(x.date)+"（"+WD[x.date.getDay()]+"）"+x.slot+"直播</small>"+(x.old?'<span class="oldt">⏳ 直播已超過 2 週，部分顏色、尺寸可能已售完，加購前歡迎先私訊小編確認唷💛</span>':"");
-  $("lbb").href=lineUrl(x);$("lb").classList.add("on");document.body.style.overflow="hidden";}
+  $("lbb").href=lineUrl(x);$("lbb").onclick=()=>track("buy",x);track("view",x);$("lb").classList.add("on");document.body.style.overflow="hidden";}
 function closeLB(){$("lb").classList.remove("on");document.body.style.overflow="";}
 $("lbx").onclick=closeLB;$("lb").onclick=e=>{if(e.target.id==="lb")closeLB();};
 $("lbp").onclick=()=>openLB((lbIdx-1+VIEW.length)%VIEW.length);
