@@ -45,6 +45,8 @@ header h1 small{display:block;font-size:13px;letter-spacing:6px;color:var(--acc)
 .ph{position:relative;aspect-ratio:800/1415;background:var(--chip);cursor:zoom-in;overflow:hidden}
 .ph img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s}
 .ph img.ok{opacity:1}
+.kb{position:absolute;left:8px;top:8px;z-index:1;font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.kb.k1{background:#d9534f}.kb.k2{background:#4f7d5c}
 .old{position:absolute;left:0;right:0;bottom:0;background:rgba(58,40,28,.82);color:#ffe9d2;font-size:12px;line-height:1.45;padding:6px 8px}
 .info{padding:9px 11px 11px;display:flex;flex-direction:column;gap:6px;flex:1}
 .t{font-weight:700;font-size:15px;line-height:1.35}
@@ -78,12 +80,14 @@ footer a{color:var(--acc)}
   </header>
 
   <div class="notice">
-    這裡收錄近 1 個月的直播商品🛍️ 錯過直播也能慢慢挑～<br>
+    這裡收錄近 1 個月的直播商品，還有🔥特價和📦現貨🛍️ 錯過直播也能慢慢挑～<br>
     看到喜歡的，點「💬 我想加購」就會開啟官方 LINE，小編幫你處理💛<br>
     <b>⏳ 標示的商品：直播已超過 2 週，部分顏色、尺寸可能已售完，加購前歡迎先私訊小編確認唷💛</b>
   </div>
 
   <div class="bar">
+    <div id="kindsBox"><div class="lbl">✨ 類型</div>
+    <div class="row" id="kinds"></div></div>
     <div class="lbl">📅 直播日期</div>
     <div class="row" id="dates"></div>
     <div class="lbl">🏷️ 店家</div>
@@ -128,13 +132,22 @@ const OLD_DAYS=14, SHOW_DAYS=31, PAGE=40;
 const WD="日一二三四五六";
 const $=id=>document.getElementById(id);
 function track(kind,x){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path:kind+"/"+x.code+"標-"+storeLabel(x.store),title:(kind==="buy"?"按我想加購：":"點開看：")+title(x),event:true});}catch(e){}}
-let ALL=[],VIEW=[],shown=0,selDates=new Set(),selStores=new Set(),q="",lbIdx=-1;
+let ALL=[],VIEW=[],shown=0,selKinds=new Set(),selDates=new Set(),selStores=new Set(),q="",lbIdx=-1;
 
-function parseSession(s){ // "1116 晚場 金髮" -> date, slot, store
-  const m=s.match(/^(\d{2})(\d{2})\s+(\S+)\s+(.+)$/); if(!m) return null;
+// 場次例："1116 晚場 金髮"、"1120現貨直播"、"1118 特價"；品名標籤例：[現貨][女團家][特價]
+const SLOTS=/早場|午場|下午場|晚場|宵夜|棚播/;
+function parseSession(s,tagStr){
+  const m=s.match(/^(\d{2})(\d{2})\s*(.*)$/); if(!m) return null;
   const now=new Date(); let y=now.getFullYear(); const mo=+m[1], d=+m[2];
+  if(mo<1||mo>12||d<1||d>31) return null;
   if(mo>now.getMonth()+2) y--; // 12 月的資料在 1 月看
-  return {date:new Date(y,mo-1,d), slot:m[3], store:m[4].trim()};
+  const rest=m[3].trim(), tags=(tagStr||"").split(",").filter(Boolean);
+  const kind=tags.some(t=>/預購/.test(t))?"直播":/現貨/.test(rest)||tags.some(t=>/現貨/.test(t))?"現貨":/特價|清倉|福利/.test(rest)||tags.some(t=>/特價/.test(t))?"特價":"直播";
+  const slotM=rest.match(SLOTS), slot=slotM&&slotM[0]!=="棚播"?slotM[0]:"";
+  let store=rest.replace(/早場|午場|下午場|晚場|宵夜/g,"").replace(/現貨直播|現貨|特價直播|特價|直播/g,"").trim();
+  if(!store){const t=tags.find(t=>/家$/.test(t))||tags.find(t=>!/現貨|特價|預購|甩|加購/.test(t)); store=t||"";}
+  if(!store) store=kind==="直播"?"其他":kind;
+  return {date:new Date(y,mo-1,d), slot, store, kind};
 }
 const storeKey=s=>s.replace(/家$/,"");
 const storeLabel=s=>/家$|棚播|\d$/.test(s)?s:s+"家";
@@ -147,24 +160,32 @@ async function load(){
   const today=new Date(); today.setHours(0,0,0,0);
   ALL=[];
   for(const r of j.rows){
-    const p=parseSession(r[0]); if(!p) continue;
+    const p=parseSession(r[0],r[4]); if(!p) continue;
     const age=Math.round((today-p.date)/864e5);
     if(age>SHOW_DAYS) continue;
-    ALL.push({code:r[1],name:r[2],img:r[3],date:p.date,slot:p.slot,store:p.store,sk:storeKey(p.store),age,old:age>OLD_DAYS});
+    ALL.push({code:r[1],name:r[2],img:r[3],date:p.date,slot:p.slot,store:p.store,kind:p.kind,sk:storeKey(p.store),age,old:age>OLD_DAYS});
   }
   ALL.sort((a,b)=>b.date-a.date||(a.slot===b.slot?0:a.slot==="宵夜"?-1:1)||(+b.code||0)-(+a.code||0));
   if(j.made&&j.made!=="sample"){const t=new Date(j.made);$("upd").textContent="資料更新：" + (t.getMonth()+1)+"/"+t.getDate();}
   buildChips(); apply();
 }
 
+const KIND_L={直播:"🎥 直播",特價:"🔥 特價",現貨:"📦 現貨"};
+const inKind=x=>!selKinds.size||selKinds.has(x.kind);
 function buildChips(){
+  // 類型（只有一種時不顯示）
+  const km=new Map(); ALL.forEach(x=>km.set(x.kind,(km.get(x.kind)||0)+1));
+  $("kindsBox").style.display=km.size>1?"":"none";
+  const K=$("kinds"); K.innerHTML="";
+  K.appendChild(chip("全部",null,selKinds.size===0,()=>{selKinds.clear();refresh();}));
+  ["直播","特價","現貨"].filter(k=>km.has(k)).forEach(k=>K.appendChild(chip(KIND_L[k],km.get(k),selKinds.has(k),()=>{toggle(selKinds,k);refresh();})));
   // 日期
-  const dm=new Map(); ALL.forEach(x=>{const k=dk(x.date); if(!dm.has(k)) dm.set(k,{d:x.date,n:0}); dm.get(k).n++;});
+  const dm=new Map(); ALL.filter(inKind).forEach(x=>{const k=dk(x.date); if(!dm.has(k)) dm.set(k,{d:x.date,n:0}); dm.get(k).n++;});
   const D=$("dates"); D.innerHTML="";
   D.appendChild(chip("全部",null,selDates.size===0,()=>{selDates.clear();refresh();}));
   for(const [k,v] of dm) D.appendChild(chip(ds(v.d)+"（"+WD[v.d.getDay()]+"）",v.n,selDates.has(k),()=>{toggle(selDates,k);refresh();}));
   // 店家（只列出目前日期範圍內有的）
-  const sm=new Map(); ALL.filter(x=>!selDates.size||selDates.has(dk(x.date))).forEach(x=>{if(!sm.has(x.sk)) sm.set(x.sk,{l:storeLabel(x.store),n:0}); sm.get(x.sk).n++;});
+  const sm=new Map(); ALL.filter(x=>inKind(x)&&(!selDates.size||selDates.has(dk(x.date)))).forEach(x=>{if(!sm.has(x.sk)) sm.set(x.sk,{l:storeLabel(x.store),n:0}); sm.get(x.sk).n++;});
   for(const k of [...selStores]) if(!sm.has(k)) selStores.delete(k);
   const S=$("stores"); S.innerHTML="";
   S.appendChild(chip("全部",null,selStores.size===0,()=>{selStores.clear();refresh();}));
@@ -176,19 +197,19 @@ function refresh(){buildChips();apply();}
 
 function apply(){
   const qq=q.trim().toLowerCase();
-  VIEW=ALL.filter(x=>(!selDates.size||selDates.has(dk(x.date)))&&(!selStores.size||selStores.has(x.sk))&&(!qq||(x.code+"標 "+x.code+" "+x.name+" "+x.store).toLowerCase().includes(qq)));
+  VIEW=ALL.filter(x=>inKind(x)&&(!selDates.size||selDates.has(dk(x.date)))&&(!selStores.size||selStores.has(x.sk))&&(!qq||(x.code+"標 "+x.code+" "+x.name+" "+x.store).toLowerCase().includes(qq)));
   $("grid").innerHTML=""; shown=0; more();
-  $("count").textContent="共 "+VIEW.length+" 件商品"+(selDates.size||selStores.size||qq?"（已篩選）":"");
+  $("count").textContent="共 "+VIEW.length+" 件商品"+(selKinds.size||selDates.size||selStores.size||qq?"（已篩選）":"");
   $("empty").hidden=VIEW.length>0;
 }
 function title(x){return x.code+"標［"+storeLabel(x.store)+"］"+x.name;}
-function lineUrl(x){return "https://line.me/R/oaMessage/"+encodeURIComponent(LINE_ID)+"/?"+encodeURIComponent("你好～我想加購 "+title(x)+"（"+ds(x.date)+" 直播）💛");}
+function lineUrl(x){return "https://line.me/R/oaMessage/"+encodeURIComponent(LINE_ID)+"/?"+encodeURIComponent("你好～我想加購 "+title(x)+"（"+ds(x.date)+" "+(x.kind==="直播"?"直播":x.kind)+"）💛");}
 function more(){
   const G=$("grid"); const end=Math.min(shown+PAGE,VIEW.length);
   for(let i=shown;i<end;i++){
     const x=VIEW[i]; const c=document.createElement("div"); c.className="card";
-    c.innerHTML='<div class="ph"><img loading="lazy" alt="'+title(x)+'" src="'+IMG(x.img)+'" onload="this.classList.add(\'ok\')">'+(x.old?'<div class="old">⏳ 直播已超過 2 週・可能缺貨，請先私訊確認</div>':'')+'</div>'+
-      '<div class="info"><div class="t"><span class="code">'+x.code+'標</span> '+x.name+'</div><div class="m">'+storeLabel(x.store)+'｜'+ds(x.date)+'（'+WD[x.date.getDay()]+'）'+x.slot+'</div>'+
+    c.innerHTML='<div class="ph"><img loading="lazy" alt="'+title(x)+'" src="'+IMG(x.img)+'" onload="this.classList.add(\'ok\')">'+(x.kind!=="直播"?'<div class="kb k'+(x.kind==="特價"?1:2)+'">'+KIND_L[x.kind]+'</div>':'')+(x.old?'<div class="old">⏳ 直播已超過 2 週・可能缺貨，請先私訊確認</div>':'')+'</div>'+
+      '<div class="info"><div class="t"><span class="code">'+x.code+'標</span> '+x.name+'</div><div class="m">'+storeLabel(x.store)+'｜'+ds(x.date)+'（'+WD[x.date.getDay()]+'）'+(x.kind==="直播"?x.slot:x.kind)+'</div>'+
       '<a class="buy" target="_blank" rel="noopener" href="'+lineUrl(x)+'">💬 我想加購</a></div>';
     c.querySelector(".ph").onclick=()=>openLB(i);
     c.querySelector(".buy").onclick=()=>track("buy",x);
@@ -199,7 +220,7 @@ function more(){
 new IntersectionObserver(e=>{if(e[0].isIntersecting&&shown<VIEW.length) more();},{rootMargin:"800px"}).observe($("more"));
 
 function openLB(i){lbIdx=i;const x=VIEW[i];$("lbi").src=IMG(x.img);$("lbi").alt=title(x);
-  $("lbc").innerHTML=title(x)+"<br><small>"+ds(x.date)+"（"+WD[x.date.getDay()]+"）"+x.slot+"直播</small>"+(x.old?'<span class="oldt">⏳ 直播已超過 2 週，部分顏色、尺寸可能已售完，加購前歡迎先私訊小編確認唷💛</span>':"");
+  $("lbc").innerHTML=title(x)+"<br><small>"+ds(x.date)+"（"+WD[x.date.getDay()]+"）"+(x.kind==="直播"?x.slot+"直播":KIND_L[x.kind])+"</small>"+(x.old?'<span class="oldt">⏳ 直播已超過 2 週，部分顏色、尺寸可能已售完，加購前歡迎先私訊小編確認唷💛</span>':"");
   $("lbb").href=lineUrl(x);$("lbb").onclick=()=>track("buy",x);track("view",x);$("lb").classList.add("on");document.body.style.overflow="hidden";}
 function closeLB(){$("lb").classList.remove("on");document.body.style.overflow="";}
 $("lbx").onclick=closeLB;$("lb").onclick=e=>{if(e.target.id==="lb")closeLB();};
@@ -210,7 +231,7 @@ $("lb").addEventListener("touchend",e=>{const d=e.changedTouches[0].clientX-sx;i
 document.addEventListener("keydown",e=>{if(!$("lb").classList.contains("on"))return;if(e.key==="Escape")closeLB();if(e.key==="ArrowRight")$("lbn").click();if(e.key==="ArrowLeft")$("lbp").click();});
 
 let tmr;$("q").oninput=e=>{clearTimeout(tmr);tmr=setTimeout(()=>{q=e.target.value;apply();},250);};
-$("clr").onclick=()=>{selDates.clear();selStores.clear();q="";$("q").value="";refresh();};
+$("clr").onclick=()=>{selKinds.clear();selDates.clear();selStores.clear();q="";$("q").value="";refresh();};
 window.addEventListener("scroll",()=>{$("top").style.display=scrollY>900?"block":"none";},{passive:true});
 $("top").onclick=()=>scrollTo({top:0,behavior:"smooth"});
 
